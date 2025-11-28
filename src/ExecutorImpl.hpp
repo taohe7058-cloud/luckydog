@@ -13,18 +13,18 @@ namespace adas
         Pose Query(void) const noexcept override;
 
     private:
-        // 增加 isFast 状态标记
-        bool isFast{false}; 
+        bool isFast{false};    // 加速状态
+        bool isReverse{false}; // 新增：倒车状态
 
-        // 状态与动作分离
-        void Fast() noexcept;      // 处理 F 指令
-        void Move() noexcept;      // 处理 M 指令
-        void TurnLeft() noexcept;  // 处理 L 指令
-        void TurnRight() noexcept; // 处理 R 指令
+        void Fast() noexcept;
+        void Reverse() noexcept; // 新增：处理 B 指令
 
-        // 提取原子操作：仅移动1格，不包含任何状态判断
-        void Step() noexcept; 
-        // 提取原子操作：仅改变朝向
+        void Move() noexcept;
+        void TurnLeft() noexcept;
+        void TurnRight() noexcept;
+
+        void Step() noexcept;         // 前进 1 步
+        void StepBackward() noexcept; // 新增：后退 1 步
         void RotateLeft() noexcept;
         void RotateRight() noexcept;
 

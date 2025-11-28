@@ -19,48 +19,69 @@ namespace adas
                 case 'M': Move(); break;
                 case 'L': TurnLeft(); break;
                 case 'R': TurnRight(); break;
-                case 'F': Fast(); break; // 新增 F 指令处理
+                case 'F': Fast(); break;
+                case 'B': Reverse(); break; // 新增 B 指令
                 default: break;
             }
         }
     }
 
-    // --- 状态变更 ---
     void ExecutorImpl::Fast() noexcept {
-        isFast = !isFast; // 切换状态
+        isFast = !isFast;
     }
 
-    // --- 核心业务逻辑 (受状态影响) ---
+    // 新增：切换倒车状态
+    void ExecutorImpl::Reverse() noexcept {
+        isReverse = !isReverse;
+    }
+
+    // --- 核心业务逻辑 (同时受 F 和 B 影响) ---
 
     void ExecutorImpl::Move() noexcept {
+        // 如果是加速状态，先移动一次
         if (isFast) {
-            Step(); // 加速状态下，多走一步
+            if (isReverse) StepBackward(); else Step();
         }
-        Step();     // 无论是否加速，都要走这一步
+        // 无论如何都要移动一次
+        if (isReverse) StepBackward(); else Step();
     }
 
     void ExecutorImpl::TurnLeft() noexcept {
+        // 加速状态下的移动
         if (isFast) {
-            Step(); // 加速状态下，先走一步
+            if (isReverse) StepBackward(); else Step();
         }
-        RotateLeft(); // 然后转向
+        // 倒车时 L 变右转，正常 L 左转
+        if (isReverse) RotateRight(); else RotateLeft();
     }
 
     void ExecutorImpl::TurnRight() noexcept {
+        // 加速状态下的移动
         if (isFast) {
-            Step(); // 加速状态下，先走一步
+            if (isReverse) StepBackward(); else Step();
         }
-        RotateRight(); // 然后转向
+        // 倒车时 R 变左转，正常 R 右转
+        if (isReverse) RotateLeft(); else RotateRight();
     }
 
-    // --- 基础原子操作 (不处理状态，只干活) ---
+    // --- 原子操作 ---
 
-    void ExecutorImpl::Step() noexcept {
+    void ExecutorImpl::Step() noexcept { // 前进
         switch (pose.heading) {
             case 'N': pose.y++; break;
             case 'S': pose.y--; break;
             case 'E': pose.x++; break;
             case 'W': pose.x--; break;
+        }
+    }
+
+    // 新增：后退实现 (坐标变化与前进相反)
+    void ExecutorImpl::StepBackward() noexcept {
+        switch (pose.heading) {
+            case 'N': pose.y--; break;
+            case 'S': pose.y++; break;
+            case 'E': pose.x--; break;
+            case 'W': pose.x++; break;
         }
     }
 
