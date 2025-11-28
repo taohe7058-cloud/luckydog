@@ -13,20 +13,26 @@ namespace adas
         Pose Query(void) const noexcept override;
 
     private:
-        bool isFast{false};    // 加速状态
-        bool isReverse{false}; // 新增：倒车状态
+        bool isFast{false};
+        bool isReverse{false};
 
         void Fast() noexcept;
-        void Reverse() noexcept; // 新增：处理 B 指令
+        void Reverse() noexcept;
+        
+        // 新增：掉头处理
+        void TurnRound() noexcept;
 
         void Move() noexcept;
         void TurnLeft() noexcept;
         void TurnRight() noexcept;
 
-        void Step() noexcept;         // 前进 1 步
-        void StepBackward() noexcept; // 新增：后退 1 步
+        void Step() noexcept;
+        void StepBackward() noexcept;
         void RotateLeft() noexcept;
         void RotateRight() noexcept;
+        
+        // 辅助函数：解析指令（处理 TR 替换）
+        std::string ParseCommand(const std::string& command) const noexcept;
 
     private:
         Pose pose;
